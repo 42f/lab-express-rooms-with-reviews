@@ -44,12 +44,21 @@ passport.use(new LocalStrategy(
   {
     usernameField: 'email'
   },
-  function verify(username, password, done) {
-    User.findOne({ username: username }, function (err, user) {
+  function verify(email, password, done) {
+    User.findOne({ email }, function (err, user) {
       if (err) { return done(err); }
       if (!user) { return done(null, false); }
-      if (!user.comparePassword(password)) { return done(null, false); }
-      return done(null, user);
+      user.comparePassword(password).then(validity => {
+        console.log(validity);
+        if (validity) {
+          return done(null, user);
+        } else {
+          return done(null, false);
+        }
+      }).catch(err => {
+        console.error(err)
+        done(err);
+      });
     });
   }
 ));

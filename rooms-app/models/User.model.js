@@ -17,13 +17,17 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.methods.comparePassword = function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password)
-    .then(isMatch => isMatch)
-    .catch(err => {
-      console.error(err);
-      return false;
-    });
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  try {
+    const match = await bcrypt.compare(candidatePassword, this.password);
+    if (match) {
+      return true;
+    }
+    throw new Error('Invalid Password')
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
 };
 
 const User = model("User", userSchema);
