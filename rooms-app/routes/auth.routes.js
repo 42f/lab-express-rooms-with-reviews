@@ -97,6 +97,7 @@ router.get("/login", isLoggedOut, (req, res) => {
 
 router.post('/login',
   passport.authenticate('local', {
+    failWithError: true,
     failureRedirect: '/auth/login',
     failureMessage: true
   }),

@@ -2,9 +2,16 @@
 <h2>{{formTitle}}</h2>
 
 <form action="{{formAction}}" method="post">
-	{{> formTextField value="name" name="Name" required=true }}
-	{{> formTextField value="description" name="Description" required=true }}
-	{{> formTextField value="imageUrl" name="Url to a photo" }}
+
+	{{> formTextField definedValue=definedValues.name
+	value="name" name="Name" required=true }}
+
+	{{> formTextField definedValue=definedValues.description
+	value="description" name="Description" required=true }}
+
+	{{> formTextField definedValue=definedValues.imageUrl
+	value="imageUrl" name="Url to a photo" }}
+
 	<input type='submit' placeholder="0" value='{{formButton}}' />
 </form>
 
