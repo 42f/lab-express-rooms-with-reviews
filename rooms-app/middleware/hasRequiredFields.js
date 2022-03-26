@@ -1,10 +1,14 @@
 const Rooms = require("../models/Room.model");
 
-module.exports = async (req, res, next) => {
-  //check if the request object contains de required fields
-  const { name, description } = req.body;
-  if (!name || !description) {
-    return res.status(400).send("Please provide all the required fields");
-  }
-  next();
-};
+const hasRequiredFields = (arrayOfFields) => {
+  return (req, res, next) => {
+    //check if the request object contains de required fields
+    const hasAllField = !arrayOfFields.some(field => !req.body[field]);
+    if (!hasAllField) {
+      return res.status(400).send("Please provide all the required fields");
+    }
+    next();
+  };
+}
+
+module.exports = hasRequiredFields;

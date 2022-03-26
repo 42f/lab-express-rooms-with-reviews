@@ -14,7 +14,7 @@ const express = require("express");
 const path = require('path');
 const hbs = require("hbs");
 hbs.registerPartials(path.join(__dirname, 'views/partials'));
-
+hbs.registerHelper('isUserTheOwner', (userId, roomOwner) => userId === roomOwner._id.toString());
 const app = express();
 
 // ℹ️ This function is getting exported from the config folder. It runs most pieces of middleware
@@ -48,17 +48,18 @@ passport.use(new LocalStrategy(
     User.findOne({ email }, function (err, user) {
       if (err) { return done(err); }
       if (!user) { return done(null, false); }
-      user.comparePassword(password).then(validity => {
-        console.log(validity);
-        if (validity) {
-          return done(null, user);
-        } else {
-          return done(null, false);
-        }
-      }).catch(err => {
-        console.error(err)
-        done(err);
-      });
+      user.comparePassword(password)
+        .then(validity => {
+          if (validity) {
+            return done(null, user);
+          } else {
+            return done(null, false);
+          }
+        })
+        .catch(err => {
+          console.error(err)
+          done(null, false, { message: err });
+        });
     });
   }
 ));
@@ -77,6 +78,9 @@ app.use("/auth", authRoutes);
 
 const roomsRoutes = require("./routes/rooms.routes");
 app.use("/rooms", roomsRoutes);
+
+const reviewsRoutes = require("./routes/reviews.routes");
+app.use("/reviews", reviewsRoutes);
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);

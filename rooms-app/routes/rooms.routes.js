@@ -1,5 +1,6 @@
 const isLoggedIn = require("../middleware/isLoggedIn");
 const Rooms = require("../models/Room.model");
+const Review = require("../models/Review.model");
 
 const isOwner = require("../middleware/isOwner");
 const hasRequiredFields = require("../middleware/hasRequiredFields");
@@ -8,10 +9,25 @@ const router = require("express").Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const rooms = await Rooms.find().populate("owner");
-    res.render("rooms/rooms", { rooms });
+    const userId = req.session.userId;
+    // populate recursively the owner of the rooms and the review with its user
+    const rooms = await Rooms.find()
+      .populate('owner')
+      .populate({
+        path: 'reviews', model: 'Review',
+        populate: { path: 'user', model: 'User' }
+      });
+    const data = {
+      userId,
+      rooms,
+      roomListTitle: 'All rooms available',
+      noRoomMessage: 'There are not any room yet.',
+      addRoomButton: false
+    }
+
+    res.render("rooms/rooms", data);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     next(err);
   }
 });
@@ -25,20 +41,20 @@ router.get("/create", (req, res, next) => {
   res.render("rooms/room-form", data);
 });
 
-router.post("/create", isLoggedIn, hasRequiredFields, (req, res, next) => {
+router.post("/create", isLoggedIn, hasRequiredFields(['name', 'description']), (req, res, next) => {
   const {
     name,
     description,
     imageUrl } = req.body;
   try {
-    if (!req.user) {
+    if (!req.userId) {
       throw new Error('User is missing');
     }
     const newRoom = new Rooms({
       name,
       description,
       imageUrl,
-      owner: req.user
+      owner: req.userId
     });
     newRoom.save();
     res.redirect("/rooms/me");
@@ -62,7 +78,7 @@ router.get("/:id/edit", isLoggedIn, isOwner, (req, res, next) => {
   res.render("rooms/room-form", data);
 });
 
-router.post("/:id/edit", isLoggedIn, isOwner, hasRequiredFields, async (req, res, next) => {
+router.post("/:id/edit", isLoggedIn, isOwner, hasRequiredFields(['name', 'description']), async (req, res, next) => {
   const { name, description, imageUrl } = req.body;
   try {
     const room = req.targetRoom;
@@ -87,8 +103,22 @@ router.get("/:id/delete", isLoggedIn, isOwner, async (req, res, next) => {
 
 router.get("/me", isLoggedIn, async (req, res, next) => {
   try {
-    const rooms = await Rooms.find({ owner: req.user });
-    res.render("rooms/me-rooms", { rooms });
+    const userId = req.userId;
+    const rooms = await Rooms.find({ owner: userId })
+      .populate('owner')
+      .populate({
+        path: 'reviews', model: 'Review',
+        populate: { path: 'user', model: 'User' }
+      });
+
+    const data = {
+      userId,
+      rooms,
+      roomListTitle: 'List of your rooms',
+      noRoomMessage: 'You don\'t have any room yet.',
+      addRoomButton: true
+    }
+    res.render("rooms/rooms", data);
   } catch (error) {
     res.status(500).send(error);
   }

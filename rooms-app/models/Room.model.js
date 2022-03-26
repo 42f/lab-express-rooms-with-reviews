@@ -5,7 +5,7 @@ const roomSchema = new Schema({
   description: { type: String, required: true },
   imageUrl: { type: String },
   owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  reviews: [] // we will update this field a bit later when we create review model
+  reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }]
 });
 
 const Room = model("Room", roomSchema);

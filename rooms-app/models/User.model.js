@@ -18,16 +18,16 @@ const userSchema = new Schema(
 );
 
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  try {
+  // try {
     const match = await bcrypt.compare(candidatePassword, this.password);
     if (match) {
       return true;
     }
     throw new Error('Invalid Password')
-  } catch (error) {
-    console.error(error);
-    return false;
-  }
+  // } catch (error) {
+  //   console.error(error);
+  //   return false;
+  // }
 };
 
 const User = model("User", userSchema);
