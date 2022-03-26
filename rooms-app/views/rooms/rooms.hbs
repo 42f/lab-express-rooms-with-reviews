@@ -1,0 +1,21 @@
+<h1>{{appTitle}} 🚀</h1>
+<h2>All rooms</h2>
+{{#if rooms.length}}
+{{#each rooms}}
+	<div>
+		<h3>{{name}}</h3>
+		<p>{{description}}</p>
+		<p>Owned by: {{owner.fullName}}</p>
+		<ul>
+			{{#each reviews}}
+				<li>
+					<p>{{comment}}</p>
+					<p>by {{user.fullName}}</p>
+				</li>
+			{{/each}}
+		</ul>
+	</div>
+{{/each}}
+{{else}}
+	<p>There are no rooms yet.</p>
+{{/if}}
